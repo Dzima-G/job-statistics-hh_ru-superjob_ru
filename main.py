@@ -30,7 +30,6 @@ def predict_rub_salary_hh(vacancy):
         payload = {"text": {vacancy}, "area": "1", "per_page": "50", "page": {page}}
         response = requests.get("https://api.hh.ru/vacancies", params=payload)
         data = response.json()
-        print(data)
         if "items" not in data:
             break
         if page == 1:
