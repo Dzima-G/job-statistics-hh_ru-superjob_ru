@@ -1,6 +1,5 @@
 import requests
 import os
-import json
 from dotenv import load_dotenv
 from terminaltables import AsciiTable
 
@@ -28,11 +27,8 @@ def predict_rub_salary_hh(vacancy):
     page = 0
     while True:
         page += 1
-        headers_hh = {
-            'User-Agent': 'api-test-agent'
-        }
         payload = {"text": {vacancy}, "area": "1", "per_page": "50", "page": {page}}
-        response = requests.get("https://api.hh.ru/vacancies", headers=headers_hh, params=payload)
+        response = requests.get("https://api.hh.ru/vacancies", params=payload)
         data = response.json()
         print(data)
         if "items" not in data:
@@ -72,8 +68,7 @@ def predict_rub_salary_sj(vacancy):
 
 def get_output_table(data, title):
     keys = list(data)
-    format_table = []
-    format_table.append(['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата'])
+    format_table = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
     for item in keys:
         format_table.append([item,
                              data[item]["vacancies_found"],
