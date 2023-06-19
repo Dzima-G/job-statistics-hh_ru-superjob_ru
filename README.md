@@ -29,7 +29,10 @@ pip install -r requirements.txt
 ### Применение
 Скрипт работает из консольной утилиты.
 
-Для запуска скриптов: ``` main.py```:
+Для запуска скрипта: ```main.py```
+``` 
+\job-statistics-hh_ru-superjob_ru> python main.py
+```
 
 
 ### Цель проекта
