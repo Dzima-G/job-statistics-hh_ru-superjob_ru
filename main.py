@@ -53,10 +53,10 @@ def predict_rub_salary_sj(vacancy):
         payload = {"keyword": vacancy, "town": "4", "catalogues": "48", "count": "50", "page": page}
         response = requests.get("https://api.superjob.ru/2.0/vacancies/", headers=headers_sj, params=payload)
         response.raise_for_status()
-        data = response.json()
-        if len(data['objects']) == 0:
+        vacancy_data = response.json()
+        if len(vacancy_data['objects']) == 0:
             break
-        for item_vacancy in data['objects']:
+        for item_vacancy in vacancy_data['objects']:
             if item_vacancy['currency'] == "rub":
                 profession.append(
                     [f"{item_vacancy['profession']}", f"{item_vacancy['town']['title']}",
@@ -66,13 +66,13 @@ def predict_rub_salary_sj(vacancy):
 
 
 def get_output_table(data, title):
-    keys = list(data)
+    vacancies_information = list(data)
     format_table = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
-    for item in keys:
-        format_table.append([item,
-                             data[item]["vacancies_found"],
-                             data[item]["vacancies_processed"],
-                             data[item]["average_salary"]
+    for vacancy in vacancies_information:
+        format_table.append([vacancy,
+                             data[vacancy]["vacancies_found"],
+                             data[vacancy]["vacancies_processed"],
+                             data[vacancy]["average_salary"]
                              ])
     table = AsciiTable(format_table)
     table.title = title
@@ -80,7 +80,7 @@ def get_output_table(data, title):
 
 
 def get_average_salary(list_vacancies, source):
-    data = dict.fromkeys(list_vacancies)
+    vacancies = dict.fromkeys(list_vacancies)
     for vacancy in list_vacancies:
         salary_statistics = {"vacancies_found": None, "vacancies_processed": None, "average_salary": None}
         if source == "sj":
@@ -91,29 +91,34 @@ def get_average_salary(list_vacancies, source):
             salary_statistics["vacancies_found"] = 0
             salary_statistics["vacancies_processed"] = 0
             salary_statistics["average_salary"] = 0
-            data[vacancy] = salary_statistics
+            vacancies[vacancy] = salary_statistics
             continue
         salary_statistics["vacancies_found"] = income_response[1]
         processed_data = [x[2] for x in income_response[0] if x[2] is not None]
         salary_statistics["vacancies_processed"] = len(processed_data)
-        salary_statistics["average_salary"] = int(sum(processed_data) / len(processed_data))
-        data[vacancy] = salary_statistics
-    return data
+        if len(processed_data):
+            salary_statistics["average_salary"] = int(sum(processed_data) / len(processed_data))
+            vacancies[vacancy] = salary_statistics
+        else:
+            salary_statistics["average_salary"] = int(sum(processed_data))
+            vacancies[vacancy] = salary_statistics
+    return vacancies
 
 
 if __name__ == "__main__":
     load_dotenv()
     sj_secret_key = os.environ['SUPER_JOB_SECRET_KEY']
-    vacancies = ["Программист Python", "Программист Java", "Программист JavaScript", "Программист Ruby",
-                 "Программист PHP", "Программист C++", "Программист C#", "Программист C", "Программист Go",
-                 "Программист Swift"]
+    vacancies = ["Программист Python", "Программист Java"]
 
     try:
-        print(get_output_table(get_average_salary(vacancies, "hh"), 'HeadHunter Moscow'))
+        hh_vacancies_data = get_average_salary(vacancies, "hh")
     except requests.exceptions.HTTPError:
         print('Ошибка! Некорректная ссылка')
 
+    print(get_output_table(hh_vacancies_data, 'HeadHunter Moscow'))
+
     try:
-        print(get_output_table(get_average_salary(vacancies, "sj"), 'SuperJob Moscow'))
+        sj_vacancies_data = get_average_salary(vacancies, "sj")
     except requests.exceptions.HTTPError:
         print('Ошибка! Некорректная ссылка')
+    print(get_output_table(sj_vacancies_data, 'SuperJob Moscow'))
