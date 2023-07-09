@@ -84,13 +84,14 @@ def get_output_table(data, title):
 
 def get_average_salary(response_vacancy):
     salary_statistics = {"vacancies_found": None, "vacancies_processed": None, "average_salary": None}
-    if not response_vacancy[1]:
+    selected_vacancies, number_vacancies = response_vacancies
+    if not number_vacancies:
         salary_statistics["vacancies_found"] = 0
         salary_statistics["vacancies_processed"] = 0
         salary_statistics["average_salary"] = 0
         return salary_statistics
-    salary_statistics["vacancies_found"] = response_vacancy[1]
-    processed_data = [x[2] for x in response_vacancy[0] if x[2] is not None]
+    salary_statistics["vacancies_found"] = number_vacancies
+    processed_data = [x[2] for x in selected_vacancies if x[2] is not None]
     salary_statistics["vacancies_processed"] = len(processed_data)
     if len(processed_data):
         salary_statistics["average_salary"] = int(sum(processed_data) / len(processed_data))
@@ -105,6 +106,7 @@ if __name__ == "__main__":
     vacancies = ["Программист Python", "Программист Java", "Программист JavaScript", "Программист Ruby",
                  "Программист PHP", "Программист C++", "Программист C#", "Программист C", "Программист Go",
                  "Программист Swift"]
+
     table_output_vacancies = dict.fromkeys(vacancies)
 
     for vacancy in vacancies:
