@@ -22,7 +22,7 @@ def predict_salary(salary_from, salary_to):
 
 
 def predict_rub_salary_hh(vacancy):
-    professions = []
+    average_salaries = []
     city = 1
     found = 0
     page = 0
@@ -37,13 +37,10 @@ def predict_rub_salary_hh(vacancy):
             found = vacancy_data["found"]
         for item_vacancy in (vacancy_data["items"]):
             if item_vacancy["salary"] is not None and item_vacancy["salary"]["currency"] in "RUR":
-                predict_salary(item_vacancy["salary"]["from"], item_vacancy["salary"]["to"])
-                professions.append([
-                    f"{item_vacancy['name']}",
-                    f"{item_vacancy['area']['name']}",
+                average_salaries.append(
                     predict_salary(item_vacancy["salary"]["from"], item_vacancy["salary"]["to"])
-                ])
-    return professions, found
+                )
+    return average_salaries, found
 
 
 def predict_rub_salary_sj(vacancy):
@@ -51,7 +48,7 @@ def predict_rub_salary_sj(vacancy):
     city = 4
     industries_sections = 48
     page = 0
-    professions = []
+    average_salaries = []
     while True:
         payload = {"keyword": vacancy, "town": city, "catalogues": industries_sections, "count": "50", "page": page}
         response = requests.get("https://api.superjob.ru/2.0/vacancies/", headers=headers_sj, params=payload)
@@ -61,11 +58,11 @@ def predict_rub_salary_sj(vacancy):
             break
         for item_vacancy in vacancy_data['objects']:
             if item_vacancy['currency'] == "rub":
-                professions.append(
-                    [f"{item_vacancy['profession']}", f"{item_vacancy['town']['title']}",
-                     predict_salary(item_vacancy['payment_from'], item_vacancy['payment_to'])])
+                average_salaries.append(
+                    predict_salary(item_vacancy['payment_from'], item_vacancy['payment_to'])
+                )
         page += 1
-    return professions
+    return average_salaries
 
 
 def get_output_table(data, title):
@@ -83,20 +80,20 @@ def get_output_table(data, title):
 
 
 def get_average_salary(response_vacancy):
-    selected_vacancies, number_vacancies = response_vacancies
+    averages_salaries, number_vacancies = response_vacancies
     if not number_vacancies:
         salary_statistics = {"vacancies_found": 0,
                              "vacancies_processed": 0,
                              "average_salary": 0
                              }
         return salary_statistics
-    processed_data = [x[2] for x in selected_vacancies if x[2] is not None]
-    if len(processed_data):
-        average_salary = int(sum(processed_data) / len(processed_data))
+    averages_salaries = [x for x in averages_salaries if x]
+    if len(averages_salaries):
+        average_salary = int(sum(averages_salaries) / len(averages_salaries))
     else:
-        average_salary = int(sum(processed_data))
+        average_salary = int(sum(averages_salaries))
     salary_statistics = {"vacancies_found": number_vacancies,
-                         "vacancies_processed": len(processed_data),
+                         "vacancies_processed": len(averages_salaries),
                          "average_salary": average_salary,
                          }
     return salary_statistics
@@ -117,6 +114,7 @@ if __name__ == "__main__":
             print('Ошибка! Некорректная ссылка')
 
         vacancy_statistics = get_average_salary(response_vacancies)
+        print(vacancy_statistics)
         table_output_vacancies[vacancy] = vacancy_statistics
     print(get_output_table(table_output_vacancies, 'HeadHunter Moscow'))
 
