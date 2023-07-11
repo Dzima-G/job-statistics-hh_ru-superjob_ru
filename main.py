@@ -25,14 +25,15 @@ def get_list_salaries_hh(profession):
     average_salaries = []
     city = 1
     found = 0
+    pages = 1
     page = 0
-    while True:
+    while page != pages:
         page += 1
         payload = {"text": {profession}, "area": city, "per_page": "50", "page": {page}}
         response = requests.get("https://api.hh.ru/vacancies", params=payload)
+        response.raise_for_status()
         vacancies = response.json()
-        if "items" not in vacancies:
-            break
+        pages = vacancies['pages'] - 1
         if page == 1:
             found = vacancies["found"]
         for vacancy in (vacancies["items"]):
