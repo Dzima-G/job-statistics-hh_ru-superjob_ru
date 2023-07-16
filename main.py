@@ -21,7 +21,7 @@ def predict_salary(salary_from, salary_to):
     return None
 
 
-def get_list_salaries_hh(profession):
+def get_salaries_hh(profession):
     average_salaries = []
     city = 1
     found = 0
@@ -52,7 +52,7 @@ def get_list_salaries_hh(profession):
     return average_salaries, found
 
 
-def get_list_salaries_sj(profession):
+def get_salaries_sj(profession):
     headers_sj = {"X-Api-App-Id": sj_secret_key}
     city = 4
     industries_sections = 48
@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
     for profession in professions:
         try:
-            response_vacancies = get_list_salaries_hh(profession)
+            response_vacancies = get_salaries_hh(profession)
         except requests.exceptions.HTTPError:
             print('Ошибка! Некорректная ссылка')
 
@@ -149,7 +149,7 @@ if __name__ == "__main__":
 
     for profession in professions:
         try:
-            response_vacancies = get_list_salaries_sj(profession)
+            response_vacancies = get_salaries_sj(profession)
         except requests.exceptions.HTTPError:
             print('Ошибка! Некорректная ссылка')
 
