@@ -41,7 +41,7 @@ def get_salaries_hh(profession):
         pages = vacancies['pages'] - 1
         if page == 1:
             found = vacancies["found"]
-        for vacancy in (vacancies["items"]):
+        for vacancy in vacancies["items"]:
             if vacancy["salary"] and vacancy["salary"]["currency"] in "RUR":
                 average_salaries.append(
                     predict_salary(
